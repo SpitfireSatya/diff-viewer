@@ -1,0 +1,58 @@
+
+<ul id="listing"></ul>
+
+<form action="http://localhost:8000/upload" method="post" enctype="multipart/form-data">
+  <label for="file">File</label>
+  <input id="file" name="file" type="file" webkitdirectory multiple />
+  <button>Upload</button>
+</form>
+
+<ul id="listing"></ul>
+
+<script type="text/javascript">
+  document.getElementById("file").addEventListener(
+    "change",
+    (event) => {
+      let output = document.getElementById("listing");
+      for (const file of event.target.files) {
+        let item = document.createElement("li");
+        item.textContent = file.webkitRelativePath;
+        output.appendChild(item);
+      }
+    },
+    false,
+  );
+
+  const form = document.querySelector('form');
+  form.addEventListener('submit', handleSubmit);
+
+  /** @param {Event} event */
+  function handleSubmit(event) {
+    const form = event.currentTarget;
+    const url = new URL(form.action);
+    const formData = new FormData(form);
+    const searchParams = new URLSearchParams(formData);
+
+    console.log(formData);
+
+    /** @type {Parameters<fetch>[1]} */
+    const fetchOptions = {
+      method: form.method,
+    };
+
+    if (form.method.toLowerCase() === 'post') {
+      if (form.enctype === 'multipart/form-data') {
+        fetchOptions.body = formData;
+      } else {
+        fetchOptions.body = searchParams;
+      }
+    } else {
+      url.search = searchParams;
+    }
+
+    fetch(url, fetchOptions);
+
+    event.preventDefault();
+  }
+
+</script>
